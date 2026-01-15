@@ -14,8 +14,6 @@
 
 ## Description
 
-> **Note on naming:** The repository is named "api-zkSync" for historical reasons, as it was originally developed for zkSync. However, **this component supports multiple blockchain ledgers**, not just zkSync. The ledger is selected via the `LEDGER_TYPE` environment variable.
-
 This component (also known as **Modena Sidetree API**) provides the main functionality for the creation and management of decentralized identifiers (DID). One of the key features of this Sidetree implementation is the ability to optimize transaction costs by minimizing the number of direct interactions with the blockchain while allowing users to modify their DIDs.
 
 ## Supported Ledgers
@@ -24,7 +22,8 @@ This implementation supports anchoring a Sidetree network on multiple blockchain
 
 | LEDGER_TYPE | Blockchain | Description |
 |-------------|------------|-------------|
-| `eth` | Ethereum-compatible | Any EVM-compatible chain (Ethereum, Polygon, Sovra, etc.) |
+| `eth` | Ethereum-compatible | Any EVM-compatible chain (Ethereum, Polygon, etc.) |
+| `sovra` | Sovra | Sovra L2 blockchain (based on ethrex) |
 | `zksync` | zkSync Era | Uses ethers wallet for zkSync L2 |
 | `rsk` | RSK | Rootstock sidechain with polling in chunks |
 | `starknet` | StarkNet | StarkNet L2 using StarkNet.js |
@@ -80,7 +79,7 @@ For Starknet, tests were conducted using the StarkNet.js module and the ledger-s
 - STARTING_BLOCKCHAIN_TIME: Block number from which the core will start synchronizing with the network.
 - BLOCKCHAIN_VERSION: Use 'latest'
 - WALLET_PRIVATE_KEY: Private key of the account that will pay for write transactions.
-- LEDGER_TYPE: 'eth' for Ethereum type, 'starknet' for StarkNet, 'rsk' for polling in chunks, 'zksync' to use ethers wallet
+- LEDGER_TYPE: 'eth' for Ethereum type, 'sovra' for Sovra L2, 'zksync' for zkSync Era, 'rsk' for RSK, 'starknet' for StarkNet
 - ACCOUNT_ADDRESS (only required in starknet): Address for the account contract.
 - SECONDARY_WALLET_PRIVATE_KEY: (optional in zksync) Private key of the account that will perform reading in 'zksync'
 - SECONDARY_RPC_URL: (optional in zksync) RPC for the wallet that reads from the blockchain in 'zksync'
@@ -105,7 +104,7 @@ Environment variables must be configured in [Source](/source/packages/did-method
 - MODENA_ANCHOR_CONTRACT 0xe0055B74422Bec15cB1625792C4aA0beDcC61AA7
 - WALLET_PRIVATE_KEY: Private Key of an address with balance in the Zksync network
 - ACCOUNT_ADDRESS: 0x9CAA73a4865fa9dbb125b6C7B2f03b6621234
-- LEDGER_TYPE: zksync | rsk | eth Blockchain network to use
+- LEDGER_TYPE: eth | sovra | zksync | rsk | starknet (see Supported Ledgers table)
 
 ### Database and CAS
 
@@ -121,7 +120,7 @@ Environment variables must be configured in [Source](/source/packages/did-method
 - STARTING_BLOCKCHAIN_TIME: Block number from which the core will start synchronizing with the network.
 - BLOCKCHAIN_VERSION: Use 'latest'
 - WALLET_PRIVATE_KEY: Private key of the account that will pay for write transactions.
-- LEDGER_TYPE: 'eth' for Ethereum type, 'starknet' for StarkNet, 'rsk' for polling in chunks, 'zksync' to use ethers wallet (better explained in other readmes)
+- LEDGER_TYPE: 'eth' for Ethereum type, 'sovra' for Sovra L2, 'zksync' for zkSync Era, 'rsk' for RSK, 'starknet' for StarkNet
 - ACCOUNT_ADDRESS (only required in starknet): Address for the account contract.
 - SECONDARY_WALLET_PRIVATE_KEY: (optional in zksync) Private key of the account that will perform reading in 'zksync'
 - SECONDARY_RPC_URL: (optional in zksync) RPC for the wallet that reads from the blockchain in 'zksync'

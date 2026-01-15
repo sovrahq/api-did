@@ -1,7 +1,5 @@
 # Modena Sidetree Implementation
 
-> **Note on repository naming:** This repository is named "api-zkSync" for historical reasons, as it was originally developed for zkSync. However, **this component supports multiple blockchain ledgers**, not just zkSync. The ledger is selected via the `LEDGER_TYPE` environment variable.
-
 Modena-sidetree is based on the Sidetree reference implementation. It supports multiple blockchain networks including Ethereum-compatible chains (ETH, Polygon, Sovra, etc.), zkSync Era, RSK, and StarkNet.
 
 Provided the right configurations it's possible to deploy a node for an existing Sidetree network or creating a new one.
@@ -10,7 +8,8 @@ Provided the right configurations it's possible to deploy a node for an existing
 
 | LEDGER_TYPE | Blockchain | Package |
 |-------------|------------|---------|
-| `eth` | Ethereum-compatible (ETH, Polygon, Sovra, etc.) | [ledger-ethereum](packages/ledger-ethereum/README.md) |
+| `eth` | Ethereum-compatible (ETH, Polygon, etc.) | [ledger-ethereum](packages/ledger-ethereum/README.md) |
+| `sovra` | Sovra L2 (based on ethrex) | [ledger-sovra](packages/ledger-sovra/README.md) |
 | `zksync` | zkSync Era | [ledger-zksync](packages/ledger-zksync/README.md) |
 | `rsk` | RSK | [ledger-rsk](packages/ledger-rsk/README.md) |
 | `starknet` | StarkNet | [ledger-starknet](packages/ledger-starknet/README.md) |
@@ -29,6 +28,7 @@ The following packages have been added:
 - [ledger-starknet](packages/ledger-starknet/README.md)
 - [ledger-rsk](packages/ledger-rsk/README.md)
 - [ledger-zksync](packages/ledger-zksync/README.md)
+- [ledger-sovra](packages/ledger-sovra/README.md)
 
 <br>
 
@@ -68,7 +68,7 @@ Some examples can be found on ***/packages/did-method-modena-api/configModena***
 - **BLOCKCHAIN_VERSION:** Use 'latest'
 - **WALLET_PRIVATE_KEY:** Private key of the account used to pay for the write transactions
 
-- **LEDGER_TYPE:** 'eth' for Ethereum-compatible chains, 'zksync' for zkSync Era, 'rsk' for RSK, or 'starknet' for StarkNet (see Supported Ledgers table above)
+- **LEDGER_TYPE:** 'eth' for Ethereum-compatible chains, 'sovra' for Sovra L2, 'zksync' for zkSync Era, 'rsk' for RSK, or 'starknet' for StarkNet (see Supported Ledgers table above)
 
 - **ACCOUNT_ADDRESS (required for StarkNet only):** Address for the account contract  
           

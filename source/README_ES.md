@@ -1,8 +1,18 @@
 #  Implementación Modena sidetree
 
-Modena-sidetree esta basado en la implementación Sidetree de referencia. Puede correr sobre una Blockchain del tipo Ethereum o sobre una StarkNet.
+Modena-sidetree esta basado en la implementación Sidetree de referencia. Soporta múltiples redes blockchain incluyendo cadenas compatibles con Ethereum (ETH, Polygon, etc.), Sovra L2, zkSync Era, RSK y StarkNet.
 
 Dada una configuracion correcta es posible conectar un nodo a una red existente de Sidetree o a una nueva.
+
+## Ledgers Soportados
+
+| LEDGER_TYPE | Blockchain | Paquete |
+|-------------|------------|---------|
+| `eth` | Compatible con Ethereum (ETH, Polygon, etc.) | [ledger-ethereum](packages/ledger-ethereum/README_ES.md) |
+| `sovra` | Sovra L2 (basado en ethrex) | [ledger-sovra](packages/ledger-sovra/README.md) |
+| `zksync` | zkSync Era | [ledger-zksync](packages/ledger-zksync/README_ES.md) |
+| `rsk` | RSK | [ledger-rsk](packages/ledger-rsk/README_ES.md) |
+| `starknet` | StarkNet | [ledger-starknet](packages/ledger-starknet/README_ES.md) |
 
 ## Diseño
 
@@ -15,6 +25,7 @@ Los siguientes paquetes fueron agregados:
 - [ledger-starknet](packages/ledger-starknet/README_ES.md)
 - [ledger-zksync](packages/ledger-zksync/README_ES.md)
 - [ledger-rsk](packages/ledger-rsk/README_ES.md)
+- [ledger-sovra](packages/ledger-sovra/README.md)
 
 <br>
 
@@ -64,7 +75,7 @@ Las configuraciones se pueden definir por medio de variables de entorno o modifi
 - **WALLET_PRIVATE_KEY:** Clave privada de la cuenta con la que se va a pagar las transacciones de escritura.
 
 
-- **LEDGER_TYPE:** 'eth' para tipo Ethereum, 'starknet' para StarkNet, 'rsk' para polling en chunks, 'zksync' para utilizar wallet ethers (mejor explicado en los otros readme)
+- **LEDGER_TYPE:** 'eth' para tipo Ethereum, 'sovra' para Sovra L2, 'zksync' para zkSync Era, 'rsk' para RSK, o 'starknet' para StarkNet (ver tabla de Ledgers Soportados arriba)
 
 - **ACCOUNT_ADDRESS (solo requerido en starknet):** Dirección para el contrato de la cuenta.
 
