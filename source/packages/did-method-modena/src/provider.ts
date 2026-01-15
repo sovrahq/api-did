@@ -5,7 +5,7 @@ import { ModenaNodeConfigs } from "./Types";
 export { ModenaNodeConfigs }
 import Ipfs from '@decentralized-identity/sidetree/dist/lib/ipfs/Ipfs';
 import { InputOptions } from "@truffle/hdwallet-provider/dist/constructor/Constructor";
-import { getEthereumLedger, getRSKLedger, getZKSyncLedger } from "./LedgerProvider";
+import { getEthereumLedger, getRSKLedger, getZKSyncLedger, getSovraLedger } from "./LedgerProvider";
 import { IEventEmitter } from '@quarkid-sidetree/common';
 
 
@@ -16,6 +16,8 @@ export { InputOptions };
 const getLedger = async (modenaNodeConfigs: ModenaNodeConfigs) => {
     switch (modenaNodeConfigs.ledgerType) {
 
+        case 'sovra':
+            return await getSovraLedger(modenaNodeConfigs);
         case 'rsk':
             return await getRSKLedger(modenaNodeConfigs);
         case 'eth':

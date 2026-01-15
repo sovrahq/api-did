@@ -1,7 +1,8 @@
 ## [Description](#description)
+## [Supported Ledgers](#supported-ledgers)
 ## [Technologies](#technologies)
 ## [Architecture](https://docs.quarkid.org/en/Arquitectura/) and [Documentation](https://docs.quarkid.org/en/Arquitectura/componentes/)
-## Configurations: 
+## Configurations:
 ### 1. [Local Environment](#local-environment-configuration)
 ### 2. [Blockchain Network Modification](#blockchain-network-modification)
 ### 3. [Environment Variables](#environment-variables)
@@ -13,7 +14,22 @@
 
 ## Description
 
-ApiZksync is a component whose main functionality is the creation and management of decentralized identifiers (DID). One of the key features of this SideTree implementation is the ability to optimize transaction costs by minimizing the number of direct interactions with the blockchain while allowing users to modify their DIDs.
+> **Note on naming:** The repository is named "api-zkSync" for historical reasons, as it was originally developed for zkSync. However, **this component supports multiple blockchain ledgers**, not just zkSync. The ledger is selected via the `LEDGER_TYPE` environment variable.
+
+This component (also known as **Modena Sidetree API**) provides the main functionality for the creation and management of decentralized identifiers (DID). One of the key features of this Sidetree implementation is the ability to optimize transaction costs by minimizing the number of direct interactions with the blockchain while allowing users to modify their DIDs.
+
+## Supported Ledgers
+
+This implementation supports anchoring a Sidetree network on multiple blockchain networks:
+
+| LEDGER_TYPE | Blockchain | Description |
+|-------------|------------|-------------|
+| `eth` | Ethereum-compatible | Any EVM-compatible chain (Ethereum, Polygon, Sovra, etc.) |
+| `zksync` | zkSync Era | Uses ethers wallet for zkSync L2 |
+| `rsk` | RSK | Rootstock sidechain with polling in chunks |
+| `starknet` | StarkNet | StarkNet L2 using StarkNet.js |
+
+The ledger type is configured via the `LEDGER_TYPE` environment variable.
 
 ## Technologies
 

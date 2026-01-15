@@ -38,6 +38,7 @@
     "@quarkid-sidetree/ethereum": "1.0.0",
     "@quarkid-sidetree/rsk": "1.0.0",
     "@quarkid-sidetree/zksync": "1.0.0",
+    "@quarkid-sidetree/sovra": "1.0.0",
     "@quarkid-sidetree/common": "1.0.0",
     "@truffle/hdwallet-provider": "^1.4.0",
     "jest-environment-node": "^27.2.5",

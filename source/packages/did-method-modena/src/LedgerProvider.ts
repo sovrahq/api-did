@@ -1,5 +1,6 @@
 import { RSKLedger } from '@quarkid-sidetree/rsk';
 import { ZKSyncLedger } from '@quarkid-sidetree/zksync';
+import { SovraLedger } from '@quarkid-sidetree/sovra';
 import { EthereumLedger } from "@quarkid-sidetree/ethereum";
 import { ModenaNodeConfigs } from "./Types";
 import { ErrorLogger } from "./ErrorLogger";
@@ -88,6 +89,18 @@ export const getZKSyncLedger = async (modenaNodeConfigs: ModenaNodeConfigs) => {
         (modenaNodeConfigs.modenaAnchorContract) ? modenaNodeConfigs.modenaAnchorContract.toLowerCase() : '',
         modenaNodeConfigs.versions[0]?.startingBlockchainTime,
         modenaNodeConfigs.rpcUrl
+    );
+    await ledger.initialize();
+    return ledger;
+};
+
+export const getSovraLedger = async (modenaNodeConfigs: ModenaNodeConfigs) => {
+    const web3 = getWeb3Provider(modenaNodeConfigs);
+    const ledger = new SovraLedger(
+        web3,
+        2000, // eventPullChunkSize for chunked event fetching
+        (modenaNodeConfigs.modenaAnchorContract) ? modenaNodeConfigs.modenaAnchorContract.toLowerCase() : undefined,
+        modenaNodeConfigs.versions[0]?.startingBlockchainTime
     );
     await ledger.initialize();
     return ledger;

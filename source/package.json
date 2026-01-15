@@ -13,6 +13,7 @@
       "packages/ledger-ethereum",
       "packages/ledger-rsk",
       "packages/ledger-zksync",
+      "packages/ledger-sovra",
       "packages/did-method-modena",
       "packages/did-method-modena-api"
     ],
