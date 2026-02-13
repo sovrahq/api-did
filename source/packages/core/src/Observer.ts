@@ -152,14 +152,31 @@ export default class Observer {
         qualifiedTransactions = qualifiedTransactions.sort((a, b) => {
           return a.transactionNumber - b.transactionNumber;
         });
-        for (const transaction of qualifiedTransactions) {
-          const transactionUnderProcessing = {
-            transaction: transaction,
-            processingStatus: TransactionProcessingStatus.Processing,
-          };
-          this.transactionsUnderProcessing.push(transactionUnderProcessing);
-          // Intentionally not awaiting on downloading and processing each operation batch.
-          this.processTransaction(transaction, transactionUnderProcessing);
+
+        // Process transactions in batches to avoid overwhelming the system
+        const batchSize = this.maxConcurrentDownloads;
+        for (let i = 0; i < qualifiedTransactions.length; i += batchSize) {
+          const batch = qualifiedTransactions.slice(i, i + batchSize);
+          Logger.info(`Processing batch ${Math.floor(i / batchSize) + 1} of ${Math.ceil(qualifiedTransactions.length / batchSize)} (${batch.length} transactions)`);
+
+          for (const transaction of batch) {
+            const transactionUnderProcessing = {
+              transaction: transaction,
+              processingStatus: TransactionProcessingStatus.Processing,
+            };
+            this.transactionsUnderProcessing.push(transactionUnderProcessing);
+            // Intentionally not awaiting on downloading and processing each operation batch.
+            this.processTransaction(transaction, transactionUnderProcessing);
+          }
+
+          // Wait for the current batch to complete before starting the next
+          if (i + batchSize < qualifiedTransactions.length) {
+            await Observer.waitUntilCountOfTransactionsUnderProcessingIsLessOrEqualTo(
+              this.transactionsUnderProcessing,
+              0
+            );
+            await this.storeThenTrimConsecutiveTransactionsProcessed();
+          }
         }
 
         // NOTE: Blockchain reorg has happened for sure only if `invalidTransactionNumberOrTimeHash` AND

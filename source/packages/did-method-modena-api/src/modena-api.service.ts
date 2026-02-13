@@ -12,11 +12,92 @@ const base64regex = /^[0-9a-zA-Z+_-]*$/;
 export class AppService {
 
   modenaNodeConfings: ModenaNodeConfigs;
-  modenaCore: Modena;
+  modenaCore: Modena | null = null;
   eventEmitter: CachedEventEmitter;
+
+  // Lazy initialization state
+  private initPromise: Promise<void> | null = null;
+  private initError: Error | null = null;
+  private readonly MAX_RETRIES = 5;
+  private readonly RETRY_DELAY_MS = 3000;
+
   constructor() {
     process.env.UV_THREADPOOL_SIZE = "240000";
-    this.init();
+    this.eventEmitter = new CachedEventEmitter();
+    this.modenaNodeConfings = new ModenaConfig();
+    console.log("Modena configs:");
+    printAll(this.modenaNodeConfings);
+    // Start initialization in background (non-blocking)
+    this.startBackgroundInit();
+  }
+
+  /**
+   * Start initialization in background without blocking constructor
+   */
+  private startBackgroundInit(): void {
+    this.initPromise = this.initWithRetry();
+  }
+
+  /**
+   * Initialize with retry and exponential backoff
+   */
+  private async initWithRetry(): Promise<void> {
+    for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
+      try {
+        console.log(`[Init] Attempt ${attempt}/${this.MAX_RETRIES}...`);
+        this.modenaCore = await getNodeInstance(this.modenaNodeConfings, this.eventEmitter);
+        this.initError = null;
+        console.log(`[Init] Success on attempt ${attempt}`);
+        return;
+      } catch (error) {
+        const err = error as Error;
+        console.error(`[Init] Attempt ${attempt} failed:`, err.message);
+        this.initError = err;
+        if (attempt < this.MAX_RETRIES) {
+          const delay = this.RETRY_DELAY_MS * attempt; // exponential backoff
+          console.log(`[Init] Retrying in ${delay}ms...`);
+          await new Promise(r => setTimeout(r, delay));
+        }
+      }
+    }
+    console.error(`[Init] All ${this.MAX_RETRIES} attempts failed`);
+  }
+
+  /**
+   * Ensure service is initialized before processing requests
+   * Called by endpoints to wait for initialization
+   */
+  async ensureInitialized(): Promise<void> {
+    if (this.modenaCore) return; // Already initialized
+
+    if (this.initPromise) {
+      await this.initPromise;
+    }
+
+    if (!this.modenaCore) {
+      // If failed, retry
+      console.log('[Init] Retrying initialization on request...');
+      this.initPromise = this.initWithRetry();
+      await this.initPromise;
+    }
+
+    if (!this.modenaCore) {
+      throw new Error('Service initialization failed after retries');
+    }
+  }
+
+  /**
+   * Check if service is ready (for health checks)
+   */
+  isReady(): boolean {
+    return this.modenaCore !== null;
+  }
+
+  /**
+   * Get last initialization error (for diagnostics)
+   */
+  getInitError(): Error | null {
+    return this.initError;
   }
 
   async debug(): Promise<DebugDto> {
@@ -75,14 +156,6 @@ export class AppService {
     }
     //si no hay nada returneo true
     return true;
-  }
-  async init(): Promise<string> {
-    this.eventEmitter = new CachedEventEmitter();
-    this.modenaNodeConfings = new ModenaConfig();
-    console.log("Modena configs:")
-    printAll(this.modenaNodeConfings)
-    this.modenaCore = await getNodeInstance(this.modenaNodeConfings, this.eventEmitter);
-    return 'Hello World!';
   }
 
   async createDID(request) {
@@ -148,9 +221,6 @@ function printAll(conf: ModenaNodeConfigs) {
   console.log(`Db name: ${conf.databaseName}`)
   console.log(`ETH RCP: ${conf.rpcUrl}`)
   console.log(`ferretdb: ${conf.mongoDbConnectionString}`)
-
-  // Object.keys(conf.walletProviderConfigs).forEach(key =>
-  //   [
-  //     console.log(`${key}: ${conf.walletProviderConfigs[key]})`)
-  //   ])
+  console.log(`batchingIntervalInSeconds: ${conf.batchingIntervalInSeconds}`)
+  console.log(`observingIntervalInSeconds: ${conf.observingIntervalInSeconds}`)
 }

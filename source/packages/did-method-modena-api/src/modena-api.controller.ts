@@ -1,5 +1,5 @@
 
-import { BadRequestException, Body, Controller, Get, HttpStatus, InternalServerErrorException, Param, Post, Query, Res } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpStatus, InternalServerErrorException, Param, Post, Query, Res, ServiceUnavailableException } from '@nestjs/common';
 import { Response } from 'express';
 import { AppService } from './modena-api.service';
 import { DebugDto } from './dto/DebugDto';
@@ -46,16 +46,19 @@ export class AppController {
 
   @Post('create')
   async createDID(@Body() request) {
+    await this.appService.ensureInitialized();
     return await this.appService.createDID(request);
   }
   @Post('operations')
   async operations(@Body() request) {
+    await this.appService.ensureInitialized();
     return await this.appService.createDID(request);
   }
 
 
   @Get("resolve/:did")
   async get(@Param("did") did: string, @Query('long') long: boolean) {
+    await this.appService.ensureInitialized();
     if (long === true)
       return await this.appService.getLongDID(did);
     return await this.appService.getDID(did);
@@ -63,26 +66,27 @@ export class AppController {
 
 
   @Get("/health/ready")
-  async firstPullReady(@Param("did") did: string) {
-
-    const a = this.appService.getPullCount();
-    if (a == 0)
-      throw new InternalServerErrorException();
-
+  async healthReady() {
+    if (!this.appService.isReady()) {
+      const error = this.appService.getInitError();
+      throw new ServiceUnavailableException(
+        error ? `Initializing... Last error: ${error.message}` : 'Initializing...'
+      );
+    }
+    return { status: 'ready' };
   }
 
   @Get("1.0/identifiers/:did")
   async getDid(@Param("did") did: string) {
-
     if (!this.appService.validateIdentifier(did))
       throw new BadRequestException("Did not formulated correctly")
 
+    await this.appService.ensureInitialized();
     const resolvedDid = await this.appService.resolveDID(did);
 
     validateSidetreeResponse(resolvedDid);
 
     return resolvedDid.body;
-
   }
 
 }

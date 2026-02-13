@@ -426,14 +426,14 @@ export default class TransactionProcessor implements ITransactionProcessor {
     const anchoredRecoverOperationModels = TransactionProcessor.composeAnchoredRecoverOperationModels(
       transaction,
       coreIndexFile,
-      coreProofFile!,
+      coreProofFile,
       chunkFile
     );
 
     const anchoredDeactivateOperationModels = TransactionProcessor.composeAnchoredDeactivateOperationModels(
       transaction,
       coreIndexFile,
-      coreProofFile!
+      coreProofFile
     );
 
     const anchoredUpdateOperationModels = TransactionProcessor.composeAnchoredUpdateOperationModels(
@@ -503,10 +503,10 @@ export default class TransactionProcessor implements ITransactionProcessor {
   private static composeAnchoredRecoverOperationModels(
     transaction: TransactionModel,
     coreIndexFile: CoreIndexFile,
-    coreProofFile: CoreProofFile,
+    coreProofFile: CoreProofFile | undefined,
     chunkFile: ChunkFileModel | undefined
   ): AnchoredOperationModel[] {
-    if (coreIndexFile.recoverDidSuffixes.length === 0) {
+    if (coreIndexFile.recoverDidSuffixes.length === 0 || coreProofFile === undefined) {
       return [];
     }
 
@@ -558,9 +558,9 @@ export default class TransactionProcessor implements ITransactionProcessor {
   private static composeAnchoredDeactivateOperationModels(
     transaction: TransactionModel,
     coreIndexFile: CoreIndexFile,
-    coreProofFile: CoreProofFile
+    coreProofFile: CoreProofFile | undefined
   ): AnchoredOperationModel[] {
-    if (coreIndexFile.deactivateDidSuffixes.length === 0) {
+    if (coreIndexFile.deactivateDidSuffixes.length === 0 || coreProofFile === undefined) {
       return [];
     }
 
@@ -610,9 +610,11 @@ export default class TransactionProcessor implements ITransactionProcessor {
   ): AnchoredOperationModel[] {
     // If provisional index file is undefined (in the case of batch containing only deactivates) or
     // if provisional index file's update operation reference count is zero (in the case of batch containing creates and/or recovers).
+    // Also return empty if provisionalProofFile is undefined to avoid TypeError on .map()
     if (
       provisionalIndexFile === undefined ||
-      provisionalIndexFile.didUniqueSuffixes.length === 0
+      provisionalIndexFile.didUniqueSuffixes.length === 0 ||
+      provisionalProofFile === undefined
     ) {
       return [];
     }

@@ -47,8 +47,8 @@ export default class SovraLedger extends EthereumLedger {
   protected lastSyncedBlockchainTime: number = 0;
   protected startingTime: number = 0;
 
-  // Default to testnet explorer
-  private explorerBaseUrl: string = SOVRA_CONFIG.testnet.explorer;
+  // Explorer URL - set dynamically based on network detection
+  private explorerBaseUrl: string = '';
 
   constructor(
     web3: Web3,
@@ -87,17 +87,48 @@ export default class SovraLedger extends EthereumLedger {
     // Call parent initialization (sets up account, networkId, contract)
     await super.initialize();
 
+    // Detect network from RPC URL and set explorer accordingly
+    const rpcUrl = this.detectRpcUrl();
+    const isMainnet = rpcUrl && !rpcUrl.includes('testnet');
+    this.explorerBaseUrl = isMainnet ? SOVRA_CONFIG.mainnet.explorer : SOVRA_CONFIG.testnet.explorer;
+    const networkName = isMainnet ? 'mainnet' : 'testnet';
+
     // If no starting time was provided and contract was just deployed, use current block
     if (!this.contractAddress) {
       this.startingTime = (await this.getLatestTime()).time;
     }
 
     // Log connection details
-    this.logger.log(`${this.SOVRA_PREFIX} Connected to Sovra network`);
+    this.logger.log(`${this.SOVRA_PREFIX} Connected to Sovra ${networkName}`);
     this.logger.log(`${this.SOVRA_PREFIX}   Network ID: ${this.networkId}`);
     this.logger.log(`${this.SOVRA_PREFIX}   Account: ${this.from}`);
+    this.logger.log(`${this.SOVRA_PREFIX}   RPC: ${rpcUrl || 'unknown'}`);
     this.logger.log(`${this.SOVRA_PREFIX}   Explorer: ${this.explorerBaseUrl}`);
     this.logger.log(`${this.SOVRA_PREFIX} Ledger ready for DID operations`);
+  }
+
+  /**
+   * Detect RPC URL from web3 provider or environment
+   */
+  private detectRpcUrl(): string | null {
+    try {
+      // Try to get from web3 provider
+      const provider = this.web3.currentProvider as any;
+      if (provider?.host) {
+        return provider.host;
+      }
+      if (provider?.connection?.url) {
+        return provider.connection.url;
+      }
+      // Fallback to environment variable
+      if (process.env.RPC_URL) {
+        return process.env.RPC_URL;
+      }
+      return null;
+    } catch {
+      // Fallback to environment variable on error
+      return process.env.RPC_URL || null;
+    }
   }
 
   /**

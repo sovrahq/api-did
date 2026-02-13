@@ -18,6 +18,10 @@ export default class SovraLedger extends EthereumLedger {
      */
     initialize(): Promise<void>;
     /**
+     * Detect RPC URL from web3 provider or environment
+     */
+    private detectRpcUrl;
+    /**
      * Helper to check if a value is a number
      */
     private isNumber;

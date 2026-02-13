@@ -96,13 +96,13 @@ export default class ZKSyncLedger implements IBlockchain {
         // zk mainnet
         case 324:
           this.logger.info(
-            `ZK sync era mainnet transaction successful: ${txn.transactionHash}`
+            `ZK sync era mainnet transaction successful: ${txn.hash}`
           );
           break;
         // zk testnet
         case 280:
           this.logger.info(
-            `ZK sync era goerli transaction successful: ${txn.transactionHash}`
+            `ZK sync era goerli transaction successful: ${txn.hash}`
           );
           break;
         default:
@@ -183,12 +183,20 @@ export default class ZKSyncLedger implements IBlockchain {
       from = (await utils.getBlock(fromBlock, this.rpcUrl)).number
     }
     let to;
-    if (this.isNumber(to)) {
+    if (this.isNumber(toBlock)) {
       to = toBlock as number
     } else {
       to = (await utils.getBlock(toBlock, this.rpcUrl)).number
     }
     this.logger.log(`fetching chunked events`);
+    // Use cache to track progress within scan cycle
+    // The cache helps continue from where we left off when scanning large block ranges
+    // Only reset cache if 'from' is significantly different (indicates config change or intentional rescan)
+    const significantDifference = 1000000; // 1M blocks threshold
+    if (from < this.lastSyncedBlockchainTime && (this.lastSyncedBlockchainTime - from) > significantDifference) {
+      this.logger.log(`Resetting lastSyncedBlockchainTime from ${this.lastSyncedBlockchainTime} to ${from} (config change detected)`);
+      this.lastSyncedBlockchainTime = from;
+    }
     let blockFrom = (from > this.lastSyncedBlockchainTime) ? from : this.lastSyncedBlockchainTime;
     const { events, lastSynced } = await utils.getPastEventsChunked(this.eventFetcher, blockFrom, to, this.eventPullchunkSize);
 

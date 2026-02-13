@@ -30,12 +30,10 @@ export class ModenaConfig {
         return getNumber(process.env.MAX_CONCURRENT_DOWNLOADS) || config.maxConcurrentDownloads;
     }
     public get observingIntervalInSeconds(): number {
-
-        return getNumber(process.env.OBSERVING_INTERVAL_IN_SECONDS) || config.observingIntervalInSeconds;
+        return getNumber(process.env.OBSERVING_INTERVAL_IN_SECONDS) ?? config.observingIntervalInSeconds;
     }
     public get batchingIntervalInSeconds(): number {
-
-        return getNumber(process.env.BATCHING_INTERVAL_IN_SECONDS) || config.batchingIntervalInSeconds;
+        return getNumber(process.env.BATCHING_INTERVAL_IN_SECONDS) ?? config.batchingIntervalInSeconds;
     }
 
     public get ledgerType(): string {
@@ -44,7 +42,7 @@ export class ModenaConfig {
 
     public get versions(): [{ startingBlockchainTime: number, version: string }] {
         return [{
-            "startingBlockchainTime": getNumber(process.env.STARTING_BLOCKCHAIN_TIME) || config.versions[0]?.startingBlockchainTime,
+            "startingBlockchainTime": getNumber(process.env.STARTING_BLOCKCHAIN_TIME) ?? config.versions[0]?.startingBlockchainTime,
             "version": process.env.BLOCKCHAIN_VERSION || config.versions[0]?.version
         }]
     }

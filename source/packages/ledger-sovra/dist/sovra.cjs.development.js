@@ -399,8 +399,8 @@ var SovraLedger = /*#__PURE__*/function (_EthereumLedger) {
     // Chunked fetching state (following RSKLedger pattern)
     _this.lastSyncedBlockchainTime = 0;
     _this.startingTime = 0;
-    // Default to testnet explorer
-    _this.explorerBaseUrl = SOVRA_CONFIG.testnet.explorer;
+    // Explorer URL - set dynamically based on network detection
+    _this.explorerBaseUrl = '';
     /**
      * Fetch transactions with chunked event fetching for better performance
      * Following RSKLedger pattern for scalability
@@ -559,6 +559,7 @@ var SovraLedger = /*#__PURE__*/function (_EthereumLedger) {
   /*#__PURE__*/
   function () {
     var _initialize = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3() {
+      var rpcUrl, isMainnet, networkName;
       return _regeneratorRuntime().wrap(function _callee3$(_context3) {
         while (1) switch (_context3.prev = _context3.next) {
           case 0:
@@ -570,22 +571,28 @@ var SovraLedger = /*#__PURE__*/function (_EthereumLedger) {
             _context3.next = 4;
             return _EthereumLedger.prototype.initialize.call(this);
           case 4:
+            // Detect network from RPC URL and set explorer accordingly
+            rpcUrl = this.detectRpcUrl();
+            isMainnet = rpcUrl && !rpcUrl.includes('testnet');
+            this.explorerBaseUrl = isMainnet ? SOVRA_CONFIG.mainnet.explorer : SOVRA_CONFIG.testnet.explorer;
+            networkName = isMainnet ? 'mainnet' : 'testnet'; // If no starting time was provided and contract was just deployed, use current block
             if (this.contractAddress) {
-              _context3.next = 8;
+              _context3.next = 12;
               break;
             }
-            _context3.next = 7;
+            _context3.next = 11;
             return this.getLatestTime();
-          case 7:
+          case 11:
             this.startingTime = _context3.sent.time;
-          case 8:
+          case 12:
             // Log connection details
-            this.logger.log(this.SOVRA_PREFIX + " Connected to Sovra network");
+            this.logger.log(this.SOVRA_PREFIX + " Connected to Sovra " + networkName);
             this.logger.log(this.SOVRA_PREFIX + "   Network ID: " + this.networkId);
             this.logger.log(this.SOVRA_PREFIX + "   Account: " + this.from);
+            this.logger.log(this.SOVRA_PREFIX + "   RPC: " + (rpcUrl || 'unknown'));
             this.logger.log(this.SOVRA_PREFIX + "   Explorer: " + this.explorerBaseUrl);
             this.logger.log(this.SOVRA_PREFIX + " Ledger ready for DID operations");
-          case 13:
+          case 18:
           case "end":
             return _context3.stop();
         }
@@ -597,9 +604,33 @@ var SovraLedger = /*#__PURE__*/function (_EthereumLedger) {
     return initialize;
   }()
   /**
-   * Helper to check if a value is a number
+   * Detect RPC URL from web3 provider or environment
    */
   ;
+  _proto.detectRpcUrl = function detectRpcUrl() {
+    try {
+      var _provider$connection;
+      // Try to get from web3 provider
+      var provider = this.web3.currentProvider;
+      if (provider != null && provider.host) {
+        return provider.host;
+      }
+      if (provider != null && (_provider$connection = provider.connection) != null && _provider$connection.url) {
+        return provider.connection.url;
+      }
+      // Fallback to environment variable
+      if (process.env.RPC_URL) {
+        return process.env.RPC_URL;
+      }
+      return null;
+    } catch (_unused) {
+      // Fallback to environment variable on error
+      return process.env.RPC_URL || null;
+    }
+  }
+  /**
+   * Helper to check if a value is a number
+   */;
   _proto.isNumber = function isNumber(n) {
     return !isNaN(parseFloat(n)) && !isNaN(n - 0);
   }
